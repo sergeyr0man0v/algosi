@@ -44,7 +44,7 @@ void MyHeapSort(unsigned int* a, int size) {
   reverse(a, size);
 }
 
-unsigned int* Merge(unsigned int* a, unsigned int* b, int k, int size_a, int size_b) {
+void Merge(unsigned int* a, unsigned int* b, int k, int size_a, int size_b) {
   unsigned int* d = new unsigned int[k];
   int i = 0, j = 0;
   for (int id = 0; id < k; ++id) {
@@ -64,24 +64,34 @@ unsigned int* Merge(unsigned int* a, unsigned int* b, int k, int size_a, int siz
       ++j;
     }
   }
-  return d;
+  for (int i = 0; i < k; ++i) {
+    a[i] = d[i];
+  }
+  delete[] d;
+}
+
+void FillArray(unsigned int* a, unsigned int a0, unsigned int x, unsigned int y, int k) {
+  a[0] = (x * a0 + y) % static_cast<long long>(std::pow(2, 30));;
+  for (int i = 1; i < k; ++i) {
+    a[i] = (x * a[i - 1] + y) % static_cast<long long>(std::pow(2, 30));
+  }
 }
 
 int main() {
   int n, k;
   unsigned int a0, x, y;
   std::cin >> n >> k >> a0 >> x >> y;
-  unsigned int a[10000];
-  a[0] = (x * a0 + y) % static_cast<long long>(std::pow(2, 30));;
-  for (int i = 1; i < n; ++i) {
-    a[i] = (x * a[i - 1] + y) % static_cast<long long>(std::pow(2, 30));
+  unsigned int a[1000];
+  FillArray(a, a0, x, y, k);
+  MyHeapSort(a, k);
+  unsigned int* c = new unsigned int [k];
+  for (int i = 0; i < k; ++i) {
+    c[i] = a[i];
   }
-  for (int i = 0; i <= (n - 1) / k; ++i) {
-    MyHeapSort(a + i * k, std::min(k, n - i * k));
-  }
-  unsigned int* c = Merge(a, a + k, k, k, std::min(k, n - k));
-  for (int i = 2; i <= (n - 1) / k; ++i) {
-    c = Merge(c, a + i * k, k, k, std::min(k, n - i * k));
+  for (int i = 1; i <= (n - 1) / k; ++i) {
+    FillArray(a, a[k - 1], x, y, std::min(k, n - i * k));
+    MyHeapSort(a, std::min(k, n - i * k));
+    Merge(c, a, k, k, std::min(k, n - i * k));
   }
   for (int i = 0; i < k; ++i) {
     std::cout << c[i] << ' ';
